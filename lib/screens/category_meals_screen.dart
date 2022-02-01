@@ -2,11 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:meals_app/models/meal.dart';
+import 'package:meals_app/widgets/category_item.dart';
 import 'package:meals_app/widgets/meal_item.dart';
 import '../dummy_data.dart';
 
 class CategoryMealsScreen extends StatefulWidget {
   static const routeName = '/category-meals';
+
+  final List<Meal> availableMeals;
+
+  CategoryMealsScreen(this.availableMeals);
 
   @override
   State<CategoryMealsScreen> createState() => _CategoryMealsScreenState();
@@ -15,25 +20,22 @@ class CategoryMealsScreen extends StatefulWidget {
 class _CategoryMealsScreenState extends State<CategoryMealsScreen> {
   late String categoryTitle;
   late List<Meal> displayedMeals;
+
   bool _loadedInitData = false;
+
   @override
-  void initState() {
+  void didChangeDependencies() {
     if (!_loadedInitData) {
       final routeArgs =
           ModalRoute.of(context)?.settings.arguments as Map<String, String>;
-      final categoryTitle = routeArgs['title'];
+      var categoryTitle = routeArgs['title'];
       final categoryId = routeArgs['id'];
-      displayedMeals = DUMMY_MEALS.where((meal) {
+      displayedMeals = widget.availableMeals.where((meal) {
         return meal.categories.contains(categoryId);
       }).toList();
       _loadedInitData = true;
     }
 
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
     super.didChangeDependencies();
   }
 
@@ -43,12 +45,22 @@ class _CategoryMealsScreenState extends State<CategoryMealsScreen> {
     });
   }
 
+  @override
+  void initState() {
+    // setState(() {
+    //     categoryTitle = routeArgs['title'];
+    //   });
+    //categoryTitle = "Static ";
+  }
+
   // final String categoryId;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(categoryTitle),
+        title: Text((ModalRoute.of(context)?.settings.arguments
+                as Map<String, String>)['title']
+            .toString()),
       ),
       body: ListView.builder(
         itemBuilder: (ctx, index) {
@@ -59,7 +71,6 @@ class _CategoryMealsScreenState extends State<CategoryMealsScreen> {
             duration: displayedMeals[index].duration,
             complexity: displayedMeals[index].complexity,
             afforadability: displayedMeals[index].afforadability,
-            removeItem: _removeMeal,
           );
         },
         itemCount: displayedMeals.length,
